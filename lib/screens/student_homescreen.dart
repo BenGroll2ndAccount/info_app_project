@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:empty_project_template/services/user_service.dart' as user_service;
+import 'package:empty_project_template/services/user_service.dart'
+    as user_service;
 import 'package:empty_project_template/screens/loading_circ.dart';
-import 'package:empty_project_template/managers/student_screendata.dart' as data;
+import 'package:empty_project_template/managers/student_screendata.dart'
+    as data;
 
 logout() {
   user_service.isLoggedIn.value = false;
@@ -42,48 +44,55 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-        return DefaultTabController(
-            length: 2,
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text('Schüler Schreibtisch'),
-                actions: [
-                  FlatButton(
-                    child: Icon(Icons.delete_outline),
-                    onPressed: () {
-                      logout();
-                    },
-                  )
-                ],
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Schüler Schreibtisch'),
+            actions: [
+              FlatButton(
+                child: Icon(Icons.delete_outline),
+                onPressed: () {
+                  logout();
+                },
+              )
+            ],
+          ),
+          body: TabBarView(
+            children: [
+              CourseBuilder(),
+              Container(color: Colors.blueAccent),
+            ],
+          ),
+          bottomNavigationBar: TabBar(
+            tabs: [
+              Tab(
+                text: "Kurse",
               ),
-              body: TabBarView(
-                children: [
-                  CourseBuilder(),
-                  Container(color: Colors.blueAccent),
-                ],
-              ),
-              bottomNavigationBar: TabBar(
-                tabs: [
-                  Tab(
-                    text: "Kurse",
-                    ),
-                  Tab(
-                    text: "Kalender",
-                  )
-                ],
-                labelColor: Colors.lightBlue[300],
-                unselectedLabelColor: Colors.lightBlue[100],
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding: EdgeInsets.all(5.0),
-                indicatorColor: Colors.blue,
-              ),
-              backgroundColor: Colors.white,
-            ),
-          );
-    ;
+              Tab(
+                text: "Kalender",
+              )
+            ],
+            labelColor: Colors.lightBlue[300],
+            unselectedLabelColor: Colors.lightBlue[100],
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicatorPadding: EdgeInsets.all(5.0),
+            indicatorColor: Colors.blue,
+          ),
+          backgroundColor: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _onBackPressed() async {
+    return false;
   }
 }
 
+// Once Logged in, this Widget redirects to the appropriate Screen inside your Schreibtisch
 class DirManager extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
