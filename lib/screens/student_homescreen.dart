@@ -26,7 +26,7 @@ class CourseBuilder extends StatelessWidget {
             ));
           } else {
             user_service.getUserCourses('000').then((value) => print(value));
-            return Text("Empty Slice");
+            return Text("Du hast keine Kurse belegt.");
           }
         } else {
           return LoadingCirc();
@@ -44,51 +44,69 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onBackPressed,
-      child: DefaultTabController(
-        length: 2,
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text('Schüler Schreibtisch'),
-            actions: [
-              FlatButton(
-                child: Icon(Icons.delete_outline),
-                onPressed: () {
-                  logout();
-                },
-              )
-            ],
-          ),
-          body: TabBarView(
-            children: [
-              CourseBuilder(),
-              Container(color: Colors.blueAccent),
-            ],
-          ),
-          bottomNavigationBar: TabBar(
-            tabs: [
-              Tab(
-                text: "Kurse",
+    return data.has_course_opened
+        ? CourseInsight(id: data.course_open_id)
+        : WillPopScope(
+            onWillPop: _onBackPressed,
+            child: DefaultTabController(
+              length: 3,
+              child: Scaffold(
+                appBar: AppBar(
+                  title: Text('Schüler Schreibtisch'),
+                  actions: [
+                    FlatButton(
+                      child: Icon(Icons.delete_outline),
+                      onPressed: () {
+                        logout();
+                      },
+                    )
+                  ],
+                ),
+                body: TabBarView(
+                  children: [
+                    CourseBuilder(),
+                    Container(color: Colors.blueAccent),
+                    Container(color: Colors.red)
+                  ],
+                ),
+                bottomNavigationBar: TabBar(
+                  tabs: [
+                    Tab(
+                      text: "Kurse",
+                    ),
+                    Tab(
+                      text: "Kalender",
+                    ),
+                    Tab(
+                      text: "Mensa",
+                    )
+                  ],
+                  labelColor: Colors.lightBlue[300],
+                  unselectedLabelColor: Colors.lightBlue[100],
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicatorPadding: EdgeInsets.all(5.0),
+                  indicatorColor: Colors.blue,
+                ),
+                backgroundColor: Colors.white,
               ),
-              Tab(
-                text: "Kalender",
-              )
-            ],
-            labelColor: Colors.lightBlue[300],
-            unselectedLabelColor: Colors.lightBlue[100],
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicatorPadding: EdgeInsets.all(5.0),
-            indicatorColor: Colors.blue,
-          ),
-          backgroundColor: Colors.white,
-        ),
-      ),
-    );
+            ),
+          );
   }
 
   Future<bool> _onBackPressed() async {
     return false;
+  }
+}
+
+class ExitDialogPopup extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      elevation: 1.0,
+    );
   }
 }
 
@@ -112,7 +130,6 @@ class DirManager extends StatelessWidget {
               break;
             default:
               {
-                print(value);
                 return LoadingCirc();
               }
               break;
@@ -120,3 +137,21 @@ class DirManager extends StatelessWidget {
         });
   }
 }
+
+class CourseInsight extends StatefulWidget {
+  String id;
+
+  CourseInsight({this.id}) : super();
+  @override
+  _CourseInsightState createState() => _CourseInsightState();
+}
+
+class _CourseInsightState extends State<CourseInsight> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(widget.id),
+    );
+  }
+}
+

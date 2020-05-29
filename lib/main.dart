@@ -3,7 +3,6 @@ import 'package:empty_project_template/managers/auth_wrapper.dart';
 import 'services/user_service.dart' as user_service;
 
 void main() {
-
   runApp(MyApp());
   user_service.tryLogginInSaved();
 }

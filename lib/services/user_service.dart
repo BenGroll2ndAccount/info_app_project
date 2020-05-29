@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:empty_project_template/managers/student_screendata.dart' as student_data;
+import 'package:empty_project_template/managers/student_screendata.dart'
+    as student_data;
 
 ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
@@ -113,12 +114,6 @@ void deleteCredentialsFile() {
   });
 }
 
-lol() {
-  Firestore.instance.collection('users').document('000').get().then((value) {
-    return value['password'];
-  });
-}
-
 Future<List<Widget>> getUserCourses(uid) async {
   dynamic courses = await Firestore.instance
       .collection('users')
@@ -154,6 +149,7 @@ Future<List<Widget>> getUserCourses(uid) async {
 }
 
 class CourseData {
+  String id;
   String name;
   String teacher;
   List<dynamic> members;
@@ -177,6 +173,9 @@ class _CourseButtonWidgetState extends State<CourseButtonWidget> {
       child: FlatButton(
         onPressed: () {
           student_data.current_dir.value = "Course";
+          if (userData.value.role == "s") {
+          } else if (userData.value.role == "t") {
+          } else if (userData.value.role == "d") {}
         },
         child: Card(
           color: Colors.blue[100],
@@ -198,15 +197,6 @@ class _CourseButtonWidgetState extends State<CourseButtonWidget> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class CourseContentBuilder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      
     );
   }
 }
