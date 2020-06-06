@@ -143,6 +143,7 @@ Future<List<Widget>> getUserCourses(uid) async {
       .map((e) => CourseButtonWidget(
             name: e.name,
             teacher: e.teacher,
+            id: e.id,
           ))
       .toList();
   return widgets;
@@ -159,8 +160,9 @@ class CourseData {
 class CourseButtonWidget extends StatefulWidget {
   final String name;
   final String teacher;
+  final String id;
 
-  CourseButtonWidget({this.name, this.teacher}) : super();
+  CourseButtonWidget({this.name, this.teacher, this.id}) : super();
   @override
   _CourseButtonWidgetState createState() => _CourseButtonWidgetState();
 }
@@ -172,7 +174,7 @@ class _CourseButtonWidgetState extends State<CourseButtonWidget> {
       padding: const EdgeInsets.all(8.0),
       child: FlatButton(
         onPressed: () {
-          student_data.current_dir.value = "Course";
+          student_data.current_dir.value = "Course " + widget.id.toString();
           if (userData.value.role == "s") {
           } else if (userData.value.role == "t") {
           } else if (userData.value.role == "d") {}

@@ -117,7 +117,8 @@ class DirManager extends StatelessWidget {
     return ValueListenableBuilder(
         valueListenable: data.current_dir,
         builder: (BuildContext context, String value, Widget child) {
-          switch (value) {
+          List<String> command = value.split(" ");
+          switch (command[0]) {
             case "Home":
               {
                 return HomeScreen();
@@ -125,7 +126,7 @@ class DirManager extends StatelessWidget {
               break;
             case "Course":
               {
-                return Container();
+                return CourseInsight(id : command[1]);
               }
               break;
             default:
@@ -139,8 +140,7 @@ class DirManager extends StatelessWidget {
 }
 
 class CourseInsight extends StatefulWidget {
-  String id;
-
+  final String id;
   CourseInsight({this.id}) : super();
   @override
   _CourseInsightState createState() => _CourseInsightState();
@@ -154,4 +154,3 @@ class _CourseInsightState extends State<CourseInsight> {
     );
   }
 }
-
