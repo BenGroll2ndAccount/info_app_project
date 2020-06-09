@@ -120,26 +120,23 @@ Future<List<Widget>> getUserCourses(uid) async {
       .document('000')
       .get()
       .then((value) => value['courses']);
-  var coursesnew = [];
+  List<CourseData> coursesnew = [];
   for (int i = 0; i < courses.length; i++) {
     DocumentSnapshot newdata = await Firestore.instance
         .collection('courses')
         .document(courses[i])
         .get();
-    coursesnew.add(newdata);
+    CourseData newCourseData = CourseData(id: courses[i], members: newdata["members"], teacher: newdata["teacher"], name: newdata["name"]);
+    coursesnew.add(newCourseData);
   }
-  List<CourseData> coursesData = coursesnew
-      .map((e) => CourseData(
-          members: e["members"], teacher: e["teacher"], name: e["name"]))
-      .toList();
   User current_data = userData.value;
   userData.value = User(
       id: current_data.id,
       password: current_data.password,
       role: current_data.role,
-      courses: coursesData);
+      courses: coursesnew);
 
-  List<CourseButtonWidget> widgets = coursesData
+  List<CourseButtonWidget> widgets = coursesnew
       .map((e) => CourseButtonWidget(
             name: e.name,
             teacher: e.teacher,
@@ -154,7 +151,7 @@ class CourseData {
   String name;
   String teacher;
   List<dynamic> members;
-  CourseData({this.name, this.teacher, this.members}) : super();
+  CourseData({this.name, this.teacher, this.members, this.id}) : super();
 }
 
 class CourseButtonWidget extends StatefulWidget {
@@ -175,9 +172,6 @@ class _CourseButtonWidgetState extends State<CourseButtonWidget> {
       child: FlatButton(
         onPressed: () {
           student_data.current_dir.value = "Course " + widget.id.toString();
-          if (userData.value.role == "s") {
-          } else if (userData.value.role == "t") {
-          } else if (userData.value.role == "d") {}
         },
         child: Card(
           color: Colors.blue[100],
