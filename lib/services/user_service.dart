@@ -1,3 +1,5 @@
+// Where mainly all dataflows are managed. Way to communicate with the database and the devices filesystem.
+
 import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +11,7 @@ import 'package:empty_project_template/managers/student_screendata.dart'
 
 ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
+// Stores the data of the User once logged in to issue less calls to the database -> less waiting time
 ValueNotifier<User> userData = ValueNotifier<User>(User());
 
 class User {
@@ -26,6 +29,7 @@ Future<File> get _credentialsDocumentReference async {
   return File('$path/credentials.txt');
 }
 
+// Check if the credentials.txt file exists
 Future<bool> get credentialsExist async {
   return _credentialsDocumentReference.then((value) => value.exists());
 }
@@ -39,6 +43,7 @@ Future<bool> get credentialsSaved async {
   }
 }
 
+// Function to test if you have saved credentials and if they match the database
 Future<bool> tryLogginInSaved() async {
   Future<bool> fileExists = credentialsExist;
   return fileExists.then((value) async {
@@ -65,6 +70,7 @@ Future<bool> tryLogginInSaved() async {
   });
 }
 
+// function to get the credentials. If not saved, will return null.
 Future<List<String>> get credentials async {
   return credentialsExist.then((exist) async {
     if (exist) {
@@ -82,6 +88,7 @@ Future<List<String>> get credentials async {
   });
 }
 
+// Function to write (new) credentials to credentials.txt
 void writeCredentials(String id, String password) {
   credentialsExist.then((value) {
     if (value) {
@@ -96,6 +103,16 @@ void writeCredentials(String id, String password) {
   });
 }
 
+// Function to delete the credentials.txt file. Does nothing if the file does not exist
+void deleteCredentialsFile() {
+  credentialsExist.then((value) {
+    if (value) {
+      _credentialsDocumentReference.then((value) => value.delete());
+    }
+  });
+}
+
+// Function to get a property out of a file of a user
 Future getUserProperty_base(id, prop) {
   return Firestore.instance
       .collection('users')
@@ -106,36 +123,47 @@ Future getUserProperty_base(id, prop) {
   });
 }
 
-void deleteCredentialsFile() {
-  credentialsExist.then((value) {
-    if (value) {
-      _credentialsDocumentReference.then((value) => value.delete());
-    }
-  });
-}
-
-Future<List<Widget>> getUserCourses(uid) async {
+// Function to get the list of courses a student is in. Returns a list of widgets to use in a ListView
+Future<List<Widget>> getUserCoursesStudent(uid) async {
+  // gets the 'courses' array from the user
   dynamic courses = await Firestore.instance
       .collection('users')
       .document('000')
       .get()
       .then((value) => value['courses']);
   List<CourseData> coursesnew = [];
+  // Converts the array of ID'S into a List of CourseData objects, one for each course.
   for (int i = 0; i < courses.length; i++) {
     DocumentSnapshot newdata = await Firestore.instance
         .collection('courses')
         .document(courses[i])
         .get();
-    CourseData newCourseData = CourseData(id: courses[i], members: newdata["members"], teacher: newdata["teacher"], name: newdata["name"]);
+    List<TabData> courseTabsData = [];
+    for (int j = 0; j < newdata["tabs"].length; j++) {
+      String tabID = newdata["tabs"][j];
+      DocumentSnapshot newTabData = await Firestore.instance
+          .collection("course-tabs")
+          .document(tabID)
+          .get();
+      TabData finalTabData = TabData(id: tabID, name: newTabData["name"]);
+      courseTabsData.add(finalTabData);
+    }
+    CourseData newCourseData = CourseData(
+        id: courses[i],
+        members: newdata["members"],
+        teacher: newdata["teacher"],
+        name: newdata["name"],
+        tabs: courseTabsData);
     coursesnew.add(newCourseData);
   }
+  // Updates the property in the UserData object which stores the information of all courses. This will update everytime the CourseList is loaded
   User current_data = userData.value;
   userData.value = User(
       id: current_data.id,
       password: current_data.password,
       role: current_data.role,
       courses: coursesnew);
-
+  // Convert the List of CourseData objects into CourseButtonWidgets for display and interaction.
   List<CourseButtonWidget> widgets = coursesnew
       .map((e) => CourseButtonWidget(
             name: e.name,
@@ -143,17 +171,34 @@ Future<List<Widget>> getUserCourses(uid) async {
             id: e.id,
           ))
       .toList();
+  // returns the List of CourseButtonWidgets
   return widgets;
 }
 
+// Object to store all information about a Course in.
 class CourseData {
+  List<Widget> get getTabWidgets {
+    if (userData.value.role == "s") {
+      return tabs.map((e) => StudentTabWidget(id: e.id, name: e.name)).toList();
+    }
+  }
+
   String id;
   String name;
   String teacher;
   List<dynamic> members;
-  CourseData({this.name, this.teacher, this.members, this.id}) : super();
+  List<TabData> tabs;
+  CourseData({this.name, this.teacher, this.members, this.id, this.tabs})
+      : super();
 }
 
+class TabData {
+  String id;
+  String name;
+  TabData({this.id, this.name}) : super();
+}
+
+// Widget that gets displayed in the StudentHomeScreen Courses tab inside the ListView. If pressed, leads to the page of the course.
 class CourseButtonWidget extends StatefulWidget {
   final String name;
   final String teacher;
@@ -171,7 +216,7 @@ class _CourseButtonWidgetState extends State<CourseButtonWidget> {
       padding: const EdgeInsets.all(8.0),
       child: FlatButton(
         onPressed: () {
-          student_data.current_dir.value = "Course " + widget.id.toString();
+          student_data.openCourse(widget.id);
         },
         child: Card(
           color: Colors.blue[100],
@@ -193,6 +238,34 @@ class _CourseButtonWidgetState extends State<CourseButtonWidget> {
           ),
         ),
       ),
+    );
+  }
+}
+
+Future<CourseData> getCourseDisplayInfoStudent(String search_id) async {
+  dynamic courses = userData.value.courses;
+  for (int i = 0; i < courses.length; i++) {
+    if (courses[i].id == search_id) {
+      return courses[i];
+    }
+  }
+  return CourseData(
+      id: "-00", members: [], teacher: "", name: "Kurs nicht gefunden!");
+}
+
+class StudentTabWidget extends StatelessWidget {
+  String name;
+  String id;
+  StudentTabWidget({this.name, this.id}) : super();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+        child: Text(name, style: TextStyle(fontSize: 20.0),),
+      ),
+      color: Colors.blue[100],
     );
   }
 }

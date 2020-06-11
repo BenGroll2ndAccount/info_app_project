@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // To easily build and insert Infobuttons everywhere
+// To insert button: Infobutton(String header, String content, Float size)    // 'size' sets the button diameter in pixels
 class InfoButton extends StatelessWidget {
   String header;
   String content;
@@ -64,7 +65,7 @@ List<Widget> createInformationList(String header, String content) {
     ),
   ];
 }
-// ------------------------ Ab hier werden vorgefertigte Beschreibungen für die Infocards gespeichert ----------------
+// ------------------------ From here on the full content Strings are saved ----------------
 
 const personalIDdescription =
     "Das ist deine persönliche Id, die einzigartig ist, um dich von anderen Nutzern zu unterscheiden. Sie besteht aus drei Zahlen(0 - 9) und/oder Buchstaben(A - F). Sie ist nicht veränderbar, spielt für dich aber auch nach dem Anmelden keine große Rolle mehr ( Trotzdem irgendwo aufheben !).";

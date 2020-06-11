@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// The screen used to log into the app.
 import 'package:flutter/material.dart';
 import 'package:empty_project_template/constants/decorations.dart' as decorations;
 import 'package:empty_project_template/constants/infos.dart' as infos;
-import 'package:empty_project_template/managers/role_manager.dart';
 import 'package:empty_project_template/services/user_service.dart' as user_service;
-import 'package:empty_project_template/screens/loading_circ.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -33,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextFormField(
+                      // The Formfield for the ID
                       onChanged: (val) => setState(() => id = val),
                       decoration: decorations.personalIdInputDecoration,
                     ),
@@ -80,15 +79,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.blueAccent[100],
                     icon: Icon(Icons.send),
                     onPressed: () async {
+                      // Function to check if you can login with the credentials you've provided
                       String needed = await user_service
                           .getUserProperty_base(id, "password")
                           .then((value) => value.toString());
-                      //Check if credentials given match the
+                      //Check if credentials given match the ones in the database
                       if (needed == password) {
                         if (keepLoggedIn) {
+                          // If you checked 'keep logged in' and entered valid credentials, this stores the decision on the storage
                           user_service.writeCredentials(id, password);
-                          
                         } else {
+                          // Just to keep bugs away ^^
                           user_service.deleteCredentialsFile();
                         }
                         String newRole =
@@ -97,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             id: id, password: password, role: newRole);
                         user_service.isLoggedIn.value = true;
                       } else {
+                        // The Error screen that shows up if you use wrong credentials
                         showModalBottomSheet(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.only(

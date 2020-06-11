@@ -1,10 +1,10 @@
+// To either display the Loginscreen or the Homescreen depending on if you're logged in 
+
 import 'package:flutter/material.dart';
 import 'package:empty_project_template/services/user_service.dart'
     as user_service;
 import 'package:empty_project_template/screens/login_screen.dart';
 import 'package:empty_project_template/managers/role_manager.dart';
-
-ValueNotifier<String> currentName = ValueNotifier<String>("Paul");
 
 
 class AuthWrapper extends StatelessWidget {
@@ -14,8 +14,10 @@ class AuthWrapper extends StatelessWidget {
         valueListenable: user_service.isLoggedIn,
         builder: (BuildContext context, bool value, Widget bruh) {
           if (value) {
+            // If you're already logged in -> RoleManager ( decides which HomeScreen you see )
             return RoleManager();
           } else {
+            // If not, shows you the LoginScreen  -> Only change the variable 'user_service.isLoggedIn' to change between login and home
             return LoginScreen();
           }
 

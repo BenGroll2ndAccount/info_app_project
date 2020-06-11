@@ -4,6 +4,8 @@ import 'package:empty_project_template/services/user_service.dart'
 import 'package:empty_project_template/screens/loading_circ.dart';
 import 'package:empty_project_template/managers/student_screendata.dart'
     as data;
+import 'package:empty_project_template/screens/student_course_screen.dart';  
+
 
 logout() {
   user_service.isLoggedIn.value = false;
@@ -13,7 +15,8 @@ class CourseBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Widget>>(
-      future: user_service.getUserCourses(user_service.userData.value.id),
+      future:
+          user_service.getUserCoursesStudent(user_service.userData.value.id),
       builder: (BuildContext context, AsyncSnapshot<List> slice) {
         if (slice.connectionState == ConnectionState.done) {
           if (slice.hasData) {
@@ -25,7 +28,6 @@ class CourseBuilder extends StatelessWidget {
               ),
             ));
           } else {
-            user_service.getUserCourses('000').then((value) => print(value));
             return Text("Du hast keine Kurse belegt.");
           }
         } else {
@@ -44,53 +46,51 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return data.has_course_opened
-        ? CourseInsight(id: data.course_open_id)
-        : WillPopScope(
-            onWillPop: _onBackPressed,
-            child: DefaultTabController(
-              length: 3,
-              child: Scaffold(
-                appBar: AppBar(
-                  title: Text('Schüler Schreibtisch'),
-                  actions: [
-                    FlatButton(
-                      child: Icon(Icons.delete_outline),
-                      onPressed: () {
-                        logout();
-                      },
-                    )
-                  ],
-                ),
-                body: TabBarView(
-                  children: [
-                    CourseBuilder(),
-                    Container(color: Colors.blueAccent),
-                    Container(color: Colors.red)
-                  ],
-                ),
-                bottomNavigationBar: TabBar(
-                  tabs: [
-                    Tab(
-                      text: "Kurse",
-                    ),
-                    Tab(
-                      text: "Kalender",
-                    ),
-                    Tab(
-                      text: "Mensa",
-                    )
-                  ],
-                  labelColor: Colors.lightBlue[300],
-                  unselectedLabelColor: Colors.lightBlue[100],
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicatorPadding: EdgeInsets.all(5.0),
-                  indicatorColor: Colors.blue,
-                ),
-                backgroundColor: Colors.white,
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Schüler Schreibtisch'),
+            actions: [
+              FlatButton(
+                child: Icon(Icons.delete_outline),
+                onPressed: () {
+                  logout();
+                },
+              )
+            ],
+          ),
+          body: TabBarView(
+            children: [
+              CourseBuilder(),
+              Container(color: Colors.blueAccent),
+              Container(color: Colors.red)
+            ],
+          ),
+          bottomNavigationBar: TabBar(
+            tabs: [
+              Tab(
+                text: "Kurse",
               ),
-            ),
-          );
+              Tab(
+                text: "Kalender",
+              ),
+              Tab(
+                text: "Mensa",
+              )
+            ],
+            labelColor: Colors.lightBlue[300],
+            unselectedLabelColor: Colors.lightBlue[100],
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicatorPadding: EdgeInsets.all(5.0),
+            indicatorColor: Colors.blue,
+          ),
+          backgroundColor: Colors.white,
+        ),
+      ),
+    );
   }
 
   Future<bool> _onBackPressed() async {
@@ -126,7 +126,7 @@ class DirManager extends StatelessWidget {
               break;
             case "Course":
               {
-                return CourseInsight(id : command[1]);
+                return CourseInsight(id: command[1]);
               }
               break;
             default:
@@ -136,21 +136,5 @@ class DirManager extends StatelessWidget {
               break;
           }
         });
-  }
-}
-
-class CourseInsight extends StatefulWidget {
-  final String id;
-  CourseInsight({this.id}) : super();
-  @override
-  _CourseInsightState createState() => _CourseInsightState();
-}
-
-class _CourseInsightState extends State<CourseInsight> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(widget.id),
-    );
   }
 }

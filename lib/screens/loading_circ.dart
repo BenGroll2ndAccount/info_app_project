@@ -1,3 +1,4 @@
+// The widget that gets displayed if your app is loading ( Waiting for Future )
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
