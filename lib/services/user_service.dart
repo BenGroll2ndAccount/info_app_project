@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:empty_project_template/managers/student_screendata.dart'
     as student_data;
+import 'package:empty_project_template/screens/student_course_screen.dart'
+    as student_course_screen;
 
 ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
@@ -18,7 +20,7 @@ class User {
   String id;
   String password;
   String role;
-  List<CourseData> courses;
+  List<dynamic> courses;
   User({this.id, this.password, this.role, this.courses});
 }
 
@@ -123,6 +125,8 @@ Future getUserProperty_base(id, prop) {
   });
 }
 
+// ----------------------------------Student------------------------------ //
+
 // Function to get the list of courses a student is in. Returns a list of widgets to use in a ListView
 Future<List<Widget>> getUserCoursesStudent(uid) async {
   // gets the 'courses' array from the user
@@ -131,24 +135,27 @@ Future<List<Widget>> getUserCoursesStudent(uid) async {
       .document('000')
       .get()
       .then((value) => value['courses']);
-  List<CourseData> coursesnew = [];
+  List<StudentCourseData> coursesnew = [];
   // Converts the array of ID'S into a List of CourseData objects, one for each course.
   for (int i = 0; i < courses.length; i++) {
     DocumentSnapshot newdata = await Firestore.instance
         .collection('courses')
         .document(courses[i])
         .get();
-    List<TabData> courseTabsData = [];
+    List<StudentTabData> courseTabsData = [];
     for (int j = 0; j < newdata["tabs"].length; j++) {
       String tabID = newdata["tabs"][j];
       DocumentSnapshot newTabData = await Firestore.instance
           .collection("course-tabs")
           .document(tabID)
           .get();
-      TabData finalTabData = TabData(id: tabID, name: newTabData["name"]);
+      StudentTabData finalTabData = StudentTabData(
+          id: tabID,
+          name: newTabData["name"],
+          contents: newTabData["contents"]);
       courseTabsData.add(finalTabData);
     }
-    CourseData newCourseData = CourseData(
+    StudentCourseData newCourseData = StudentCourseData(
         id: courses[i],
         members: newdata["members"],
         teacher: newdata["teacher"],
@@ -164,8 +171,8 @@ Future<List<Widget>> getUserCoursesStudent(uid) async {
       role: current_data.role,
       courses: coursesnew);
   // Convert the List of CourseData objects into CourseButtonWidgets for display and interaction.
-  List<CourseButtonWidget> widgets = coursesnew
-      .map((e) => CourseButtonWidget(
+  List<StudentCourseButtonWidget> widgets = coursesnew
+      .map((e) => StudentCourseButtonWidget(
             name: e.name,
             teacher: e.teacher,
             id: e.id,
@@ -176,10 +183,13 @@ Future<List<Widget>> getUserCoursesStudent(uid) async {
 }
 
 // Object to store all information about a Course in.
-class CourseData {
+class StudentCourseData {
   List<Widget> get getTabWidgets {
     if (userData.value.role == "s") {
-      return tabs.map((e) => StudentTabWidget(id: e.id, name: e.name)).toList();
+      return tabs
+          .map((e) =>
+              student_course_screen.StudentTabWidget(id: e.id, name: e.name))
+          .toList();
     }
   }
 
@@ -187,29 +197,31 @@ class CourseData {
   String name;
   String teacher;
   List<dynamic> members;
-  List<TabData> tabs;
-  CourseData({this.name, this.teacher, this.members, this.id, this.tabs})
+  List<StudentTabData> tabs;
+  StudentCourseData({this.name, this.teacher, this.members, this.id, this.tabs})
       : super();
 }
 
-class TabData {
+class StudentTabData {
   String id;
   String name;
-  TabData({this.id, this.name}) : super();
+  List<dynamic> contents;
+  StudentTabData({this.id, this.name, this.contents}) : super();
 }
 
-// Widget that gets displayed in the StudentHomeScreen Courses tab inside the ListView. If pressed, leads to the page of the course.
-class CourseButtonWidget extends StatefulWidget {
+// Widget that gets displayed in the StudentHomeScreen Courses Card inside the ListView. If pressed, leads to the page of the course.
+class StudentCourseButtonWidget extends StatefulWidget {
   final String name;
   final String teacher;
   final String id;
 
-  CourseButtonWidget({this.name, this.teacher, this.id}) : super();
+  StudentCourseButtonWidget({this.name, this.teacher, this.id}) : super();
   @override
-  _CourseButtonWidgetState createState() => _CourseButtonWidgetState();
+  _StudentCourseButtonWidgetState createState() =>
+      _StudentCourseButtonWidgetState();
 }
 
-class _CourseButtonWidgetState extends State<CourseButtonWidget> {
+class _StudentCourseButtonWidgetState extends State<StudentCourseButtonWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -242,30 +254,161 @@ class _CourseButtonWidgetState extends State<CourseButtonWidget> {
   }
 }
 
-Future<CourseData> getCourseDisplayInfoStudent(String search_id) async {
+Future<StudentCourseData> getCourseDisplayInfoStudent(String search_id) async {
   dynamic courses = userData.value.courses;
   for (int i = 0; i < courses.length; i++) {
     if (courses[i].id == search_id) {
       return courses[i];
     }
   }
-  return CourseData(
+  return StudentCourseData(
       id: "-00", members: [], teacher: "", name: "Kurs nicht gefunden!");
 }
 
-class StudentTabWidget extends StatelessWidget {
-  String name;
-  String id;
-  StudentTabWidget({this.name, this.id}) : super();
+// -------------------------------- TEACHER ----------------------------------------------- //
+Future<List<Widget>> getUserCoursesTeacher(uid) async {
+  // gets the 'courses' array from the user
+  dynamic courses = await Firestore.instance
+      .collection('users')
+      .document('000')
+      .get()
+      .then((value) => value['courses']);
+  List<TeacherCourseData> coursesnew = [];
+  // Converts the array of ID'S into a List of CourseData objects, one for each course.
+  for (int i = 0; i < courses.length; i++) {
+    DocumentSnapshot newdata = await Firestore.instance
+        .collection('courses')
+        .document(courses[i])
+        .get();
+    List<TeacherTabData> courseTabsData = [];
+    for (int j = 0; j < newdata["tabs"].length; j++) {
+      String tabID = newdata["tabs"][j];
+      DocumentSnapshot newTabData = await Firestore.instance
+          .collection("course-tabs")
+          .document(tabID)
+          .get();
+      TeacherTabData finalTabData = TeacherTabData(
+          id: tabID,
+          name: newTabData["name"],
+          contents: newTabData["contents"]);
+      courseTabsData.add(finalTabData);
+    }
+    TeacherCourseData newCourseData = TeacherCourseData(
+        id: courses[i],
+        members: newdata["members"],
+        teacher: newdata["teacher"],
+        name: newdata["name"],
+        tabs: courseTabsData);
+    coursesnew.add(newCourseData);
+  }
+  // Updates the property in the UserData object which stores the information of all courses. This will update everytime the CourseList is loaded
+  User current_data = userData.value;
+  userData.value = User(
+      id: current_data.id,
+      password: current_data.password,
+      role: current_data.role,
+      courses: coursesnew);
+  // Convert the List of CourseData objects into CourseButtonWidgets for display and interaction.
+  List<TeacherCourseButtonWidget> widgets = coursesnew
+      .map((e) => TeacherCourseButtonWidget(
+            name: e.name,
+            teacher: e.teacher,
+            id: e.id,
+          ))
+      .toList();
+  // returns the List of CourseButtonWidgets
+  return widgets;
+}
 
+// Object to store all information about a Course in.
+class TeacherCourseData {
+  List<Widget> get getTabWidgets {
+    if (userData.value.role == "s") {
+      return tabs
+          .map((e) =>
+              student_course_screen.StudentTabWidget(id: e.id, name: e.name))
+          .toList();
+    }
+  }
+
+  String id;
+  String name;
+  String teacher;
+  List<dynamic> members;
+  List<TeacherTabData> tabs;
+  TeacherCourseData({this.name, this.teacher, this.members, this.id, this.tabs})
+      : super();
+}
+
+class TeacherTabData {
+  String id;
+  String name;
+  List<dynamic> contents;
+  TeacherTabData({this.id, this.name, this.contents}) : super();
+}
+
+// Widget that gets displayed in the StudentHomeScreen Courses Card inside the ListView. If pressed, leads to the page of the course.
+class TeacherCourseButtonWidget extends StatefulWidget {
+  final String name;
+  final String teacher;
+  final String id;
+
+  TeacherCourseButtonWidget({this.name, this.teacher, this.id}) : super();
+  @override
+  _TeacherCourseButtonWidgetState createState() =>
+      _TeacherCourseButtonWidgetState();
+}
+
+class _TeacherCourseButtonWidgetState extends State<TeacherCourseButtonWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-        child: Text(name, style: TextStyle(fontSize: 20.0),),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: FlatButton(
+        onPressed: () {
+          student_data.openCourse(widget.id);
+        },
+        child: Card(
+          color: Colors.blue[100],
+          elevation: 6.0,
+          child: Container(
+            child: Center(
+              child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 0.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(width: 10.0),
+                      Text(widget.name, style: TextStyle(fontSize: 30.0)),
+                      SizedBox(width: 4.0),
+                      Expanded(
+                        child: Container(),
+                      ),
+                      SizedBox(width: 4.0),
+                      IconButton(
+                        icon: Icon(Icons.reorder), 
+                        onPressed: () {},
+                        iconSize: 40.0,
+                        ),
+                        SizedBox(width: 10.0),
+                    ],
+                  )),
+            ),
+          ),
+        ),
       ),
-      color: Colors.blue[100],
     );
   }
+}
+
+Future<TeacherCourseData> getCourseDisplayInfoTeacher(String search_id) async {
+  dynamic courses = userData.value.courses;
+  for (int i = 0; i < courses.length; i++) {
+    if (courses[i].id == search_id) {
+      return courses[i];
+    }
+  }
+  return TeacherCourseData(
+      id: "-00", members: [], teacher: "", name: "Kurs nicht gefunden!");
 }

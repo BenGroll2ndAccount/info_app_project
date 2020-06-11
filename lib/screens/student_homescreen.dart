@@ -111,7 +111,7 @@ class ExitDialogPopup extends StatelessWidget {
 }
 
 // Once Logged in, this Widget redirects to the appropriate Screen inside your Schreibtisch
-class DirManager extends StatelessWidget {
+class StudentDirManager extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(

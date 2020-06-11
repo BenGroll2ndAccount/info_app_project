@@ -12,9 +12,9 @@ class RoleManager extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (user_service.userData.value.role == "s") {
-      return DirManager();
+      return StudentDirManager();
     } else if (user_service.userData.value.role == "t") {
-      return TeacherHomeScreen();
+      return TeacherDirManager();
     } else if (user_service.userData.value.role == "d") {
       return DevHomeScreen();
     } else {
