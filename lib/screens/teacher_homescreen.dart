@@ -1,43 +1,41 @@
-import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:empty_project_template/services/user_service.dart'
     as user_service;
-import 'package:flutter/material.dart';
+import 'package:empty_project_template/screens/loading_circ.dart';
 import 'package:empty_project_template/managers/teacher_screendata.dart'
     as data;
-import 'package:empty_project_template/screens/loading_circ.dart';
+import 'package:empty_project_template/screens/teacher_course_screen.dart';  
 
-
-// Once Logged in, this Widget redirects to the appropriate Screen inside your Schreibtisch
-class TeacherDirManager extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: data.current_dir,
-        builder: (BuildContext context, String value, Widget child) {
-          List<String> command = value.split(" ");
-          switch (command[0]) {
-            case "Home":
-              {
-                return HomeScreen();
-              }
-              break;
-            case "Course":
-              {
-                //return CourseInsight(id: command[1]);
-              }
-              break;
-            default:
-              {
-                return LoadingCirc();
-              }
-              break;
-          }
-        });
-  }
-}
 
 logout() {
   user_service.isLoggedIn.value = false;
+}
+
+class CourseBuilder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Widget>>(
+      future:
+          user_service.getUserCoursesTeacher(user_service.userData.value.id),
+      builder: (BuildContext context, AsyncSnapshot<List> slice) {
+        if (slice.connectionState == ConnectionState.done) {
+          if (slice.hasData) {
+            return Center(
+                child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView(
+                children: slice.data,
+              ),
+            ));
+          } else {
+            return Text("Du unterrichtest noch keine Kurse.");
+          }
+        } else {
+          return LoadingCirc();
+        }
+      },
+    );
+  }
 }
 
 class HomeScreen extends StatefulWidget {
@@ -100,30 +98,43 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-
-class CourseBuilder extends StatelessWidget {
+class ExitDialogPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Widget>>(
-      future:
-          user_service.getUserCoursesTeacher(user_service.userData.value.id),
-      builder: (BuildContext context, AsyncSnapshot<List> slice) {
-        if (slice.connectionState == ConnectionState.done) {
-          if (slice.hasData) {
-            return Center(
-                child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Wrap(
-                children: slice.data,
-              ),
-            ));
-          } else {
-            return Text("Du unterrichtest noch keine Kurse.");
-          }
-        } else {
-          return LoadingCirc();
-        }
-      },
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      elevation: 1.0,
     );
+  }
+}
+
+// Once Logged in, this Widget redirects to the appropriate Screen inside your Schreibtisch
+class TeacherDirManager extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+        valueListenable: data.current_dir,
+        builder: (BuildContext context, String value, Widget child) {
+          List<String> command = value.split(" ");
+          switch (command[0]) {
+            case "Home":
+              {
+                return HomeScreen();
+              }
+              break;
+            case "Course":
+              {
+                return CourseInsight(id: command[1]);
+              }
+              break;
+            default:
+              {
+                return LoadingCirc();
+              }
+              break;
+          }
+        });
   }
 }

@@ -2,9 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:empty_project_template/services/user_service.dart'
     as user_service;
-import 'package:empty_project_template/managers/student_screendata.dart'
+import 'package:empty_project_template/managers/teacher_screendata.dart'
     as data;
 import 'package:empty_project_template/screens/loading_circ.dart';
+import 'package:empty_project_template/constants/decorations.dart' as deco;
 
 ValueNotifier<String> current_tab_open = ValueNotifier("");
 
@@ -23,9 +24,9 @@ class _CourseInsightState extends State<CourseInsight> {
         return data.closeCourse();
       },
       child: FutureBuilder(
-        future: user_service.getCourseDisplayInfoStudent(widget.id),
+        future: user_service.getCourseDisplayInfoTeacher(widget.id),
         builder: (BuildContext context,
-            AsyncSnapshot<user_service.StudentCourseData> this_course_data) {
+            AsyncSnapshot<user_service.TeacherCourseData> this_course_data) {
           if (this_course_data.connectionState == ConnectionState.done) {
             current_tab_open.value = this_course_data.data.tabs[0].id;
             return Scaffold(
@@ -79,6 +80,11 @@ class _CourseInsightState extends State<CourseInsight> {
                       ),
                     )),
               ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  addNewMessageToCourseTab(context);
+                },
+              ),
             );
           } else {
             return LoadingCirc();
@@ -89,11 +95,11 @@ class _CourseInsightState extends State<CourseInsight> {
   }
 }
 
-class StudentTabWidget extends StatelessWidget {
+class TeacherTabWidget extends StatelessWidget {
   String name;
   String id;
   bool active = false;
-  StudentTabWidget({this.name, this.id}) : super();
+  TeacherTabWidget({this.name, this.id}) : super();
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -129,18 +135,20 @@ class StudentTabWidget extends StatelessWidget {
 }
 
 List<dynamic> getTabContents(
-    String id, List<user_service.StudentTabData> tabs) {
+    String id, List<user_service.TeacherTabData> tabs) {
   for (int i = 0; i < tabs.length; i++) {
     if (tabs[i].id == id) {
       return tabs[i].contents;
     }
   }
-  return null;
+  return [];
 }
 
 Widget buildWidgetFromTabContent(DocumentSnapshot tabContent) {
   if (tabContent["type"] == "message") {
     return MessageWidget(text: tabContent["text"], date: tabContent["date"]);
+  } else {
+    return Container();
   }
 }
 
@@ -178,5 +186,44 @@ class MessageWidget extends StatelessWidget {
         ],
       ),
     ));
+  }
+}
+
+void addNewMessageToCourseTab(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return NewCourseMessageSheet();
+    }
+  )
+}
+
+
+class NewCourseMessageSheet extends StatefulWidget {
+  @override
+  _NewCourseMessageSheetState createState() => _NewCourseMessageSheetState();
+}
+
+class _NewCourseMessageSheetState extends State<NewCourseMessageSheet> {
+  String currentMessageText = "";
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Column(
+              children: <Widget>[
+                TextFormField(
+                  decoration: deco.newCourseMessageInputDecoration,
+                  onChanged: (value) => setState({
+                    currentMessageText = value
+                  }),
+                )
+              ],
+            ),
+          )
+        )
+      );
   }
 }

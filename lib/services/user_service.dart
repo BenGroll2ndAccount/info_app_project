@@ -10,6 +10,11 @@ import 'package:empty_project_template/managers/student_screendata.dart'
     as student_data;
 import 'package:empty_project_template/screens/student_course_screen.dart'
     as student_course_screen;
+import 'package:empty_project_template/managers/teacher_screendata.dart' 
+    as teacher_data;
+import 'package:empty_project_template/screens/teacher_course_screen.dart'
+    as teacher_course_screen;
+
 
 ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
@@ -265,7 +270,10 @@ Future<StudentCourseData> getCourseDisplayInfoStudent(String search_id) async {
       id: "-00", members: [], teacher: "", name: "Kurs nicht gefunden!");
 }
 
-// -------------------------------- TEACHER ----------------------------------------------- //
+// ------------------------------------------- Teacher ------------------------------------ //
+
+
+// Function to get the list of courses a teacher teaches. Returns a list of widgets to use in a ListView
 Future<List<Widget>> getUserCoursesTeacher(uid) async {
   // gets the 'courses' array from the user
   dynamic courses = await Firestore.instance
@@ -323,10 +331,10 @@ Future<List<Widget>> getUserCoursesTeacher(uid) async {
 // Object to store all information about a Course in.
 class TeacherCourseData {
   List<Widget> get getTabWidgets {
-    if (userData.value.role == "s") {
+    if (userData.value.role == "t") {
       return tabs
           .map((e) =>
-              student_course_screen.StudentTabWidget(id: e.id, name: e.name))
+              teacher_course_screen.TeacherTabWidget(id: e.id, name: e.name))
           .toList();
     }
   }
@@ -347,7 +355,7 @@ class TeacherTabData {
   TeacherTabData({this.id, this.name, this.contents}) : super();
 }
 
-// Widget that gets displayed in the StudentHomeScreen Courses Card inside the ListView. If pressed, leads to the page of the course.
+// Widget that gets displayed in the TeacherHomeScreen Courses Card inside the ListView. If pressed, leads to the page of the course.
 class TeacherCourseButtonWidget extends StatefulWidget {
   final String name;
   final String teacher;
@@ -366,7 +374,7 @@ class _TeacherCourseButtonWidgetState extends State<TeacherCourseButtonWidget> {
       padding: const EdgeInsets.all(8.0),
       child: FlatButton(
         onPressed: () {
-          student_data.openCourse(widget.id);
+          teacher_data.openCourse(widget.id);
         },
         child: Card(
           color: Colors.blue[100],
@@ -374,26 +382,16 @@ class _TeacherCourseButtonWidgetState extends State<TeacherCourseButtonWidget> {
           child: Container(
             child: Center(
               child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 0.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(width: 10.0),
-                      Text(widget.name, style: TextStyle(fontSize: 30.0)),
-                      SizedBox(width: 4.0),
-                      Expanded(
-                        child: Container(),
-                      ),
-                      SizedBox(width: 4.0),
-                      IconButton(
-                        icon: Icon(Icons.reorder), 
-                        onPressed: () {},
-                        iconSize: 40.0,
-                        ),
-                        SizedBox(width: 10.0),
-                    ],
-                  )),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10.0, horizontal: 0.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text(widget.name, style: TextStyle(fontSize: 30.0)),
+                    Text(widget.teacher, style: TextStyle(fontSize: 20.0))
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -412,3 +410,6 @@ Future<TeacherCourseData> getCourseDisplayInfoTeacher(String search_id) async {
   return TeacherCourseData(
       id: "-00", members: [], teacher: "", name: "Kurs nicht gefunden!");
 }
+
+
+

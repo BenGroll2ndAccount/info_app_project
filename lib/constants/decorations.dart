@@ -15,3 +15,7 @@ const passwordInputDecoration = InputDecoration(
   hintStyle: TextStyle(fontSize: 16.0),
 );
 
+const newCourseMessageInputDecoration = InputDecoration(
+  hintText: "Inhalt der Nachricht",
+  hintStyle: TextStyle(fontSize: 14.0),
+)
