@@ -191,13 +191,11 @@ class MessageWidget extends StatelessWidget {
 
 void addNewMessageToCourseTab(BuildContext context) {
   showModalBottomSheet(
-    context: context,
-    builder: (BuildContext context) {
-      return NewCourseMessageSheet();
-    }
-  )
+      context: context,
+      builder: (BuildContext context) {
+        return NewCourseMessageSheet();
+      });
 }
-
 
 class NewCourseMessageSheet extends StatefulWidget {
   @override
@@ -210,20 +208,18 @@ class _NewCourseMessageSheetState extends State<NewCourseMessageSheet> {
   Widget build(BuildContext context) {
     return Container(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Column(
-              children: <Widget>[
-                TextFormField(
-                  decoration: deco.newCourseMessageInputDecoration,
-                  onChanged: (value) => setState({
-                    currentMessageText = value
-                  }),
-                )
-              ],
-            ),
+            child: Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Column(
+        children: <Widget>[
+          TextFormField(
+            decoration: deco.newCourseMessageInputDecoration,
+            onChanged: (value) => setState(() {
+              currentMessageText = value;
+            }),
           )
-        )
-      );
+        ],
+      ),
+    )));
   }
 }

@@ -1,4 +1,3 @@
-
 // Preset decorations to insert evenly and easily everywhere needed
 
 import 'package:flutter/material.dart';
@@ -18,4 +17,4 @@ const passwordInputDecoration = InputDecoration(
 const newCourseMessageInputDecoration = InputDecoration(
   hintText: "Inhalt der Nachricht",
   hintStyle: TextStyle(fontSize: 14.0),
-)
+);
