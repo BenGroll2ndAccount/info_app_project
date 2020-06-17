@@ -31,7 +31,7 @@ class _CourseInsightState extends State<CourseInsight> {
             current_tab_open.value = this_course_data.data.tabs[0].id;
             return Scaffold(
               appBar: AppBar(
-                title: Text(this_course_data.data.name),
+                title: Text(this_course_data.data.name + " - Lehrer"),
                 actions: <Widget>[
                   FlatButton(
                     onPressed: data.closeCourse,
@@ -84,6 +84,7 @@ class _CourseInsightState extends State<CourseInsight> {
                 onPressed: () {
                   addNewMessageToCourseTab(context);
                 },
+                child: Icon(Icons.add),
               ),
             );
           } else {
@@ -192,6 +193,10 @@ class MessageWidget extends StatelessWidget {
 void addNewMessageToCourseTab(BuildContext context) {
   showModalBottomSheet(
       context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0), topRight: Radius.circular(20.0)),
+      ),
       builder: (BuildContext context) {
         return NewCourseMessageSheet();
       });
@@ -209,7 +214,7 @@ class _NewCourseMessageSheetState extends State<NewCourseMessageSheet> {
     return Container(
         child: Center(
             child: Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
       child: Column(
         children: <Widget>[
           TextFormField(
@@ -217,7 +222,20 @@ class _NewCourseMessageSheetState extends State<NewCourseMessageSheet> {
             onChanged: (value) => setState(() {
               currentMessageText = value;
             }),
-          )
+          ),
+          SizedBox(
+            height: 8.0,
+          ),
+          RaisedButton.icon(
+            onPressed: () {
+              user_service.uploadNewMessage(
+                  current_tab_open.value, currentMessageText);
+              Navigator.of(context).pop();
+              currentMessageText = "";
+            },
+            icon: Icon(Icons.send),
+            label: Text(" Nachricht einstellen."),
+          ),
         ],
       ),
     )));

@@ -10,11 +10,10 @@ import 'package:empty_project_template/managers/student_screendata.dart'
     as student_data;
 import 'package:empty_project_template/screens/student_course_screen.dart'
     as student_course_screen;
-import 'package:empty_project_template/managers/teacher_screendata.dart' 
+import 'package:empty_project_template/managers/teacher_screendata.dart'
     as teacher_data;
 import 'package:empty_project_template/screens/teacher_course_screen.dart'
     as teacher_course_screen;
-
 
 ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
 
@@ -272,7 +271,6 @@ Future<StudentCourseData> getCourseDisplayInfoStudent(String search_id) async {
 
 // ------------------------------------------- Teacher ------------------------------------ //
 
-
 // Function to get the list of courses a teacher teaches. Returns a list of widgets to use in a ListView
 Future<List<Widget>> getUserCoursesTeacher(uid) async {
   // gets the 'courses' array from the user
@@ -411,5 +409,19 @@ Future<TeacherCourseData> getCourseDisplayInfoTeacher(String search_id) async {
       id: "-00", members: [], teacher: "", name: "Kurs nicht gefunden!");
 }
 
-
-
+void uploadNewMessage(tabID, message) async {
+  DocumentReference contentDoc =
+      await Firestore.instance.collection("tab-contents").add({
+    'date': Timestamp.now(),
+    'text': message,
+    'type': "message",
+  });
+  DocumentReference tabDoc =
+      Firestore.instance.collection("course-tabs").document(tabID);
+  DocumentSnapshot tabData = await tabDoc.get();
+  List<dynamic> newContentsList = tabData['contents'];
+  newContentsList.add(contentDoc.documentID.toString());
+  tabDoc.updateData({
+    'contents': newContentsList,
+  });
+}
