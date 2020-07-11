@@ -315,9 +315,9 @@ Future<List<Widget>> getUserCoursesTeacher(uid) async {
       role: current_data.role,
       courses: coursesnew);
   // Convert the List of CourseData objects into CourseButtonWidgets for display and interaction.
-  List<TeacherCourseButtonWidget> widgets = coursesnew
+  List<Widget> widgets = coursesnew
       .map((e) => TeacherCourseButtonWidget(
-            name: e.name,
+            name: e.name, 
             teacher: e.teacher,
             id: e.id,
           ))

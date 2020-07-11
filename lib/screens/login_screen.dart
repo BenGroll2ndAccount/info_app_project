@@ -49,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Expanded(
                     child: TextFormField(
                         decoration: decorations.passwordInputDecoration,
+                        obscureText: true,
                         onChanged: (val) => setState(() => password = val)),
                   ),
                   infos.InfoButton(

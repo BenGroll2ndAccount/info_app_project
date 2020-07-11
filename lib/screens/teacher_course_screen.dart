@@ -36,7 +36,10 @@ class _CourseInsightState extends State<CourseInsight> {
                   FlatButton(
                     onPressed: data.closeCourse,
                     child: Icon(Icons.keyboard_arrow_left),
-                  )
+                  ),
+                  FlatButton(
+                  onPressed: () {}, 
+                  child: null)
                 ],
               ),
               body: Padding(
@@ -239,5 +242,16 @@ class _NewCourseMessageSheetState extends State<NewCourseMessageSheet> {
         ],
       ),
     )));
+  }
+}
+
+class CreateNewCourseButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return RaisedButton.icon(
+      onPressed: () {}, 
+      icon: Icon(Icons.add), 
+      label: Text("Neuen Kurs Erstellen"),
+      );
   }
 }

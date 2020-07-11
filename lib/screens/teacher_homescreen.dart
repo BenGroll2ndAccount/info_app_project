@@ -15,25 +15,25 @@ class CourseBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Widget>>(
-      future:
-          user_service.getUserCoursesTeacher(user_service.userData.value.id),
-      builder: (BuildContext context, AsyncSnapshot<List> slice) {
-        if (slice.connectionState == ConnectionState.done) {
-          if (slice.hasData) {
-            return Center(
-                child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView(
-                children: slice.data,
-              ),
-            ));
-          } else {
-            return Text("Du unterrichtest noch keine Kurse.");
-          }
-        } else {
-          return LoadingCirc();
-        }
-      },
+          future:
+              user_service.getUserCoursesTeacher(user_service.userData.value.id),
+          builder: (BuildContext context, AsyncSnapshot<List> slice) {
+            if (slice.connectionState == ConnectionState.done) {
+              if (slice.hasData) {
+                return Center(
+                    child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView(
+                    children: slice.data,
+                  ),
+                ));
+              } else {
+                return Text("Du unterrichtest noch keine Kurse.");
+              }
+            } else {
+              return LoadingCirc();
+            }
+          },
     );
   }
 }
@@ -138,3 +138,4 @@ class TeacherDirManager extends StatelessWidget {
         });
   }
 }
+
